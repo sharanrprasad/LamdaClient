@@ -83,7 +83,7 @@ class HomeScreen extends Component<HomeScreenProps, HomeScreenState> {
       numOfExecutions: this.state.numExecutions
     };
 
-    fetch("http://localhost:4000/rest-api/getresults", {
+    fetch("http://34.218.234.60/rest-api/getresults", {
       body: JSON.stringify(lamdaData),
       headers: {
         "x-access-token": this.state.token,

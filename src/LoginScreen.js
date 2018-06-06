@@ -55,7 +55,7 @@ class LoginScreen extends Component<LoginProps,LoginState> {
         password:this.state.password
     }
 
-    fetch("http://localhost:4000/api/sign-in",{
+    fetch("http://34.218.234.60/api/sign-in",{
       body : JSON.stringify(loginData),
       headers : {
         'content-type': 'application/json'
