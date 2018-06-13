@@ -16,6 +16,7 @@ import type {Match, RouterHistory} from 'react-router-dom';
 import {withRouter} from 'react-router-dom';
 import projectConstants from './projectConstants';
 import type {ServerResponse} from './projectConstants';
+import {endPoint} from './helpers';
 
 type LoginProps = {
   classes: typeof styles,
@@ -55,7 +56,7 @@ class LoginScreen extends Component<LoginProps,LoginState> {
         password:this.state.password
     }
 
-    fetch("http://34.218.234.60/api/sign-in",{
+    fetch(`${endPoint}/api/sign-in`,{
       body : JSON.stringify(loginData),
       headers : {
         'content-type': 'application/json'

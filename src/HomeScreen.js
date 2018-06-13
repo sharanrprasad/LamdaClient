@@ -20,6 +20,7 @@ import { Link, withRouter } from "react-router-dom";
 import type { RouterHistory, Match } from "react-router-dom";
 import type { ServerResponse } from "./projectConstants";
 import projectConstants from "./projectConstants";
+import {endPoint} from './helpers';
 
 type HomeScreenProps = {
   history: RouterHistory,
@@ -44,7 +45,8 @@ type HomeScreenState = {
   fetchResult?: {
     dataSet: Array<dataResult>,
     err: number
-  }
+  },
+  clientTime : number
 };
 
 class HomeScreen extends Component<HomeScreenProps, HomeScreenState> {
@@ -53,19 +55,31 @@ class HomeScreen extends Component<HomeScreenProps, HomeScreenState> {
     this.state = {
       isLoggedIn: localStorage.getItem("token") !== null,
       numLoops: 1,
-      maxPrime: 2,
+      maxPrime: 100,
       numExecutions: 100,
       isFetching: false,
-      token: localStorage.getItem("token") || ""
+      token: localStorage.getItem("token") || "",
+      clientTime : 0
     };
     this.handleSiteDataChange = this.handleSiteDataChange.bind(this);
     this.fetchLamdaFunctions = this.fetchLamdaFunctions.bind(this);
+    this.getTimeElasped = this.getTimeElasped.bind(this);
   }
+
+  startTime : number
 
   componentDidMount() {
     if (!this.state.isLoggedIn) {
       this.props.history.push("/login");
     }
+  }
+
+   getTimeElasped = (startTime : number) => {
+    let endTime : Date = new Date();
+    let timeDiff = endTime - startTime; //in ms
+    // strip the ms
+    timeDiff /= 1000;
+    return timeDiff;
   }
 
   handleSiteDataChange = (name: string) => (event: Object) => {
@@ -76,6 +90,7 @@ class HomeScreen extends Component<HomeScreenProps, HomeScreenState> {
   };
 
   fetchLamdaFunctions = () => {
+    this.startTime = Date.now();
     this.setState({ isFetching: true });
     let lamdaData = {
       maxPrime: this.state.maxPrime,
@@ -83,7 +98,7 @@ class HomeScreen extends Component<HomeScreenProps, HomeScreenState> {
       numOfExecutions: this.state.numExecutions
     };
 
-    fetch("http://34.218.234.60/rest-api/getresults", {
+    fetch(`${endPoint}/rest-api/getresults`, {
       body: JSON.stringify(lamdaData),
       headers: {
         "x-access-token": this.state.token,
@@ -103,7 +118,8 @@ class HomeScreen extends Component<HomeScreenProps, HomeScreenState> {
         else {
           this.setState({
             fetchResult: jsonData.data,
-            isFetching: false
+            isFetching: false,
+            clientTime : this.getTimeElasped(this.startTime)
           });
         }
       })
@@ -173,6 +189,10 @@ class HomeScreen extends Component<HomeScreenProps, HomeScreenState> {
 
         {this.state.fetchResult &&
           this.state.fetchResult.dataSet && (
+              <div>
+                <Typography variant="title" color="inherit" className={classes.addSiteButton}>
+                  {`Client side Time taken - ${this.state.clientTime} S`}
+                </Typography>
             <Table className={classes.table}>
               <TableHead>
                 <TableRow>
@@ -182,7 +202,7 @@ class HomeScreen extends Component<HomeScreenProps, HomeScreenState> {
                     Total time {`(${this.state.numLoops})`}{" "}
                   </TableCell>
                   <TableCell> Average time</TableCell>
-                  <TableCell> Cost </TableCell>
+                  <TableCell> Cost (USD) </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -198,6 +218,7 @@ class HomeScreen extends Component<HomeScreenProps, HomeScreenState> {
                 })}
               </TableBody>
             </Table>
+              </div>
           )}
       </div>
     );
@@ -228,6 +249,7 @@ const styles = theme => ({
     marginLeft: theme.spacing.unit * 5,
     marginRight: theme.spacing.unit,
     marginTop: theme.spacing.unit * 5,
+    marginBottom : theme.spacing.unit * 3,
     display : "block"
   },
   textField: {
